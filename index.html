@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול זמינות טכנאי - דוד זינגר</title>
+  <style>
+    body { font-family: Arial, sans-serif; direction: rtl; background: #f0f0f0; }
+    .container { max-width: 500px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .header { text-align: center; margin-bottom: 20px; }
+    .btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    .btn-available { background: #4CAF50; color: white; }
+    .btn-unavailable { background: #F44336; color: white; }
+    .btn-reason { background: #e0e0e0; color: #333; }
+    .status { margin: 20px 0; padding: 15px; border-radius: 5px; text-align: center; }
+    .available { background: #e8f5e9; color: #388e3c; }
+    .unavailable { background: #ffebee; color: #d32f2f; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ניהול זמינות טכנאי - דוד זינגר</h1>
+    </div>
+    
+    <div id="status-display" class="status available">
+      <h2>מצב נוכחי: <span id="current-status">זמין</span></h2>
+      <p id="reason-text" style="display: none;">סיבה: <span id="reason"></span></p>
+      <p id="time-text" style="display: none;">זמין שוב ב: <span id="return-time"></span></p>
+    </div>
+    
+    <div id="available-options" style="display: block;">
+      <h3>סמן כלא זמין:</h3>
+      <button class="btn btn-reason" id="btn-call">בקריאה</button>
+      <button class="btn btn-reason" id="btn-break">בהפסקה</button>
+      <button class="btn btn-reason" id="btn-travel">סיוע בהפעלת סימולציה בחדר תמר</button>
+      <button class="btn btn-reason" id="btn-travel1">סיוע בהפעלת סימולציה בחדר אמנון</button>
+      <button class="btn btn-reason" id="btn-end">סיום משמרת</button>
+    </div>
+    
+    <div id="unavailable-options" style="display: none;">
+      <button class="btn btn-available" id="btn-available">סמן כזמין</button>
+    </div>
+  </div>
+
+  <script>
+    // מצב התחלתי
+    let isAvailable = true;
+    let unavailabilityReason = '';
+    let returnTime = null;
+    
+    // הוספת מאזינים לאירועים מיד לאחר טעינת המסמך
+    document.addEventListener('DOMContentLoaded', function() {
+      // מאזינים לכפתורי אי-זמינות
+      document.getElementById('btn-call').addEventListener('click', function() {
+        setUnavailable('בקריאה', 60);
+      });
+      
+      document.getElementById('btn-break').addEventListener('click', function() {
+        setUnavailable('בהפסקה', 30);
+      });
+      
+      document.getElementById('btn-travel').addEventListener('click', function() {
+        setUnavailable('סיוע בהפעלת סימולציה בחדר תמר', 45);
+      });
+
+      document.getElementById('btn-travel1').addEventListener('click', function() {
+        setUnavailable('סיוע בהפעלת סימולציה בחדר אמנון', 45);
+
+      });
+      document.getElementById('btn-end').addEventListener('click', function() {
+        setUnavailable('סיום משמרת', 0);
+      });
+      
+      // מאזין לכפתור זמינות
+      document.getElementById('btn-available').addEventListener('click', function() {
+        setAvailable();
+      });
+    });
+    
+    // פונקציה להגדרת מצב "לא זמין"
+    function setUnavailable(reason, minutes) {
+      isAvailable = false;
+      unavailabilityReason = reason;
+      
+      // חישוב זמן חזרה
+      if (minutes > 0) {
+        const now = new Date();
+        returnTime = new Date(now.getTime() + minutes * 60000);
+      } else {
+        returnTime = null;
+      }
+      
+      updateUI();
+    }
+    
+    // פונקציה להגדרת מצב "זמין"
+    function setAvailable() {
+      isAvailable = true;
+      unavailabilityReason = '';
+      returnTime = null;
+      updateUI();
+    }
+    
+    // עדכון ממשק המשתמש
+    function updateUI() {
+      // עדכון תצוגת הסטטוס
+      const statusDisplay = document.getElementById('status-display');
+      const currentStatus = document.getElementById('current-status');
+      
+      if (isAvailable) {
+        statusDisplay.className = 'status available';
+        currentStatus.textContent = 'זמין';
+        document.getElementById('reason-text').style.display = 'none';
+        document.getElementById('time-text').style.display = 'none';
+      } else {
+        statusDisplay.className = 'status unavailable';
+        currentStatus.textContent = 'לא זמין';
+        
+        // הצגת סיבה
+        document.getElementById('reason-text').style.display = 'block';
+        document.getElementById('reason').textContent = unavailabilityReason;
+        
+        // הצגת זמן חזרה (אם יש)
+        if (returnTime) {
+          document.getElementById('time-text').style.display = 'block';
+          document.getElementById('return-time').textContent = returnTime.toLocaleTimeString('he-IL', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+        } else {
+          document.getElementById('time-text').style.display = 'none';
+        }
+      }
+      
+      // הצגת/הסתרת האפשרויות המתאימות
+      document.getElementById('available-options').style.display = isAvailable ? 'block' : 'none';
+      document.getElementById('unavailable-options').style.display = isAvailable ? 'none' : 'block';
+    }
+  </script>
+</body>
+</html>
